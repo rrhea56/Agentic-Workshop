@@ -38,7 +38,8 @@ _ROUTE_BY_CATEGORY = {
     Category.PERFORMANCE: Route.PERFORMANCE_TEAM,
     Category.HOW_TO: Route.HOW_TO_TEAM,
 }
-_SENTENCE_BOUNDARY = re.compile(r"[.!?](?=\s+[A-Z0-9])")
+_ABBREVIATION = re.compile(r"\b(?:[A-Za-z]\.){2,}")
+_SENTENCE_BOUNDARY = re.compile(r"[.!?](?:[\"')\]]*)?(?=\s*\S)")
 
 
 class TriageDecision(BaseModel):
@@ -57,9 +58,16 @@ class TriageDecision(BaseModel):
         value = value.strip()
         if not value:
             raise ValueError("rationale must be one sentence")
-        if "\n" in value or not value.endswith((".", "!", "?")):
+        if (
+            "\n" in value
+            or not value.endswith((".", "!", "?"))
+            or not re.search(r"[A-Za-z0-9]", value)
+        ):
             raise ValueError("rationale must be one sentence")
-        if _SENTENCE_BOUNDARY.search(value):
+        without_abbreviations = _ABBREVIATION.sub(
+            lambda match: re.sub(r"[.!?]", " ", match.group()), value
+        )
+        if _SENTENCE_BOUNDARY.search(without_abbreviations):
             raise ValueError("rationale must be one sentence")
         return value
 

@@ -62,19 +62,39 @@ def test_each_category_maps_to_its_route(category: str, route: str) -> None:
     assert decision.route.value == route
 
 
-def test_route_must_match_category() -> None:
-    with pytest.raises(ValidationError, match="route must be 'bug-team'"):
+@pytest.mark.parametrize(
+    ("category", "route", "expected_route"),
+    [
+        ("billing", "bug-team", "billing-team"),
+        ("bug", "billing-team", "bug-team"),
+        ("access", "billing-team", "access-team"),
+        ("performance", "billing-team", "performance-team"),
+        ("how-to", "billing-team", "how-to-team"),
+    ],
+)
+def test_route_must_match_category(
+    category: str, route: str, expected_route: str
+) -> None:
+    with pytest.raises(ValidationError, match=f"route must be '{expected_route}'"):
         TriageDecision(
-            category="bug",
+            category=category,
             priority="P3",
-            route="billing-team",
+            route=route,
             rationale="The export button fails in Firefox.",
         )
 
 
 @pytest.mark.parametrize(
     "rationale",
-    ["", "First sentence. Second sentence.", "The customer reports a duplicate charge"],
+    [
+        "",
+        "First sentence. Second sentence.",
+        "First sentence. second sentence.",
+        'First sentence." Next sentence.',
+        "First!Second.",
+        "!!!",
+        "The customer reports a duplicate charge",
+    ],
 )
 def test_rationale_must_be_one_sentence(rationale: str) -> None:
     with pytest.raises(ValidationError, match="rationale must be one sentence"):
