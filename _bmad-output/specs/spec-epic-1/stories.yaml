@@ -1,0 +1,12 @@
+- id: "1"
+  title: Decision schema validation
+  description: >-
+    Implement CAP-1's triage decision contract with the five allowed categories,
+    P1–P4 priorities, matching team routes, and a one-sentence rationale;
+    reject every other shape with a clear error.
+- id: "2"
+  title: Deterministic seed loader
+  description: >-
+    Implement CAP-2's loader so one command imports the read-only ticket and
+    customer CSVs into app.db tables named tickets and customers with matching
+    columns and repeatable results; run this after story 1.
